@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import encrypt from "mongoose-encryption";
 
 const port = 3000;
 const app = express();
@@ -14,10 +15,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const URL = "mongodb://localhost:27017/userDB";
 mongoose.connect(URL);
 
-const userSchema = {
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
+
+const secret = "ashusharmaisgreat";
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
 
 const User = new mongoose.model("User", userSchema);
 
@@ -47,9 +51,25 @@ app.post("/register", (req, res) => {
   });
 });
 
-app.get("/logout", (req, res)=>{
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  User.findOne({ email: username }, (err, foundUser) => {
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+        if (foundUser.password === password) {
+          res.render("secrets");
+        }
+      }
+    }
+  });
+});
+
+app.get("/logout", (req, res) => {
   res.redirect("/");
-})
+});
 
 app.listen(port, () => {
   console.log(`Application running on port ${port}.`);
