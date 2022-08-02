@@ -1,11 +1,11 @@
+import 'dotenv/config'
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import encrypt from "mongoose-encryption";
 
-const port = 3000;
+const port = 3001;
 const app = express();
-
 // Basic App Set up
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-const secret = "ashusharmaisgreat";
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+
+userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
 
 const User = new mongoose.model("User", userSchema);
 
