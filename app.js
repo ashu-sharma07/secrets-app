@@ -1,9 +1,10 @@
-import 'dotenv/config'
+import "dotenv/config";
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import encrypt from "mongoose-encryption";
+import bcrypt from "bcrypt";
 
+const saltRounds = 10;
 const port = 3001;
 const app = express();
 // Basic App Set up
@@ -20,9 +21,6 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-
-userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
-
 const User = new mongoose.model("User", userSchema);
 
 app.get("/", (req, res) => {
@@ -38,22 +36,25 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password,
-  });
-  newUser.save((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("secrets");
-    }
+  bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+    // Store hash in  password DB.
+    const newUser = new User({
+      email: req.body.username,
+      password: hash,
+    });
+    newUser.save((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.render("secrets");
+      }
+    });
   });
 });
 
 app.post("/login", (req, res) => {
   const username = req.body.username;
-  const password = req.body.password;
+  const password = md5(req.body.password);
   User.findOne({ email: username }, (err, foundUser) => {
     if (err) {
       console.log(err);
