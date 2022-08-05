@@ -105,12 +105,12 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/secrets", (req, res) => {
-  User.find({ secrets: { $ne: null } }, (err, foundUser)=>{
-    if(err){
+  User.find({ secrets: { $ne: null } }, (err, foundUser) => {
+    if (err) {
       console.log(err);
-    }else{
-      if(foundUser){
-        res.render("secrets", {usersWithSecrets: foundUser});
+    } else {
+      if (foundUser) {
+        res.render("secrets", { usersWithSecrets: foundUser });
       }
     }
   });
